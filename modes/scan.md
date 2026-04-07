@@ -70,6 +70,18 @@ Los niveles son aditivos — se ejecutan todos, los resultados se mezclan y dedu
    b. Para cada job extraer: `{title, url, company}`
    c. Acumular en lista de candidatos (dedup con Nivel 1)
 
+5b. **Nivel 2b — GitHub README aggregators** (paralelo):
+   Para cada empresa en `tracked_companies` con `scan_method: github_readme`:
+   a. WebFetch del `careers_url` (debe ser la URL raw del README, ej. `https://raw.githubusercontent.com/.../README.md`)
+   b. Parsear la tabla markdown — cada fila típicamente tiene columnas `Company | Role | Location | Apply | Date Posted`
+   c. Para cada fila, extraer:
+      - `company` de la columna Company (puede tener formato `[Name](url)` o `↳` para indicar misma empresa que la fila anterior)
+      - `title` de la columna Role
+      - `url` del enlace de "Apply" (típicamente un `<a href="...">` con imagen, o link markdown)
+      - Filtrar filas marcadas como "🔒" (closed) o sin link de Apply
+   d. Acumular en lista de candidatos (dedup con otros niveles)
+   e. NOTA: estos READMEs contienen cientos de roles — limitar a las 100 entries más recientes (top of table) para no saturar
+
 6. **Nivel 3 — WebSearch queries** (paralelo si posible):
    Para cada query en `search_queries` con `enabled: true`:
    a. Ejecutar WebSearch con el `query` definido
